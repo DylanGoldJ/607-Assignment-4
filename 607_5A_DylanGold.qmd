@@ -8,13 +8,13 @@ editor: visual
 
 ## Approach
 
-In this assignment we need to recreate a table given to us from an image, then tidy that data set. \
-When tidying a data set there are several things we have to do. Specifically we need to recreate the data in a way such that each column is a variable, row is a observation and each cell is a value. \ 
-Then we need to count data and some sort of analysis with this, compare percentages and other things shown in the rubric.
+In this assignment we need to recreate a table given to us from an image, then tidy that data set.\
+When tidying a data set there are several things we have to do. Specifically we need to recreate the data in a way such that each column is a variable, row is a observation and each cell is a value.   Then we need to count data and some sort of analysis with this, compare percentages and other things shown in the rubric.
 
-My plan is to recreate the data in csv format. I will just do it by hand because it is only 20 cell values and afew row and column names. \
-I will add an extra row name, which is implyed in the data but it would be easier to work with if it already had the row value. \
+My plan is to recreate the data in csv format. I will just do it by hand because it is only 20 cell values and afew row and column names.\
+I will add an extra row name, which is implied in the data but it would be easier to work with if it already had the row value.\
 Bring it into R and use tidyr and dplyr with to make it molten/long and go from there to perform the analysis. Functions like pivot_longer and pivot_wider will help.
 
 # Codebase
-```
+
+First I manually make a csv from the image, then I import it in after pushing it to github.
