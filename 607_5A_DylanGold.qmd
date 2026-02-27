@@ -27,13 +27,41 @@ First I manually make a csv from the image, then I import it in after pushing it
 
 
 
-```{r, warning=FALSE}
-url <- "https://raw.githubusercontent.com/DylanGoldJ/607-Assignment-4/refs/heads/main/607_5A_Data.csv"
+```{r,message=FALSE, warning=FALSE}
+url <- "https://raw.githubusercontent.com/DylanGoldJ/607-Assignment-4/refs/heads/main/5A_Data.csv"
 
 df <- read_csv(
   file = url,
   col_names = TRUE
 )
 
-head(df, 10)
+df
 ```
+
+We can start to make it tidy. We can start by fixing the first two column names
+```{r}
+airport_arrivals <- df %>% rename(c(airline = "...1", arrival_status = "...2"))
+airport_arrivals
+```
+Now we can make it tidy by combining all the columns into row values. We need to have a row specifying the destination, as well as a column containing the frequency displayed in the cells in the data frame above.
+```{r}
+airport_arrivals <- airport_arrivals %>%
+  pivot_longer(
+    cols = !c(airline:arrival_status),
+    names_to = "destination",
+    values_to = "frequency"
+    )
+
+head(airport_arrivals, 8)
+
+```
+
+The data is now in tidy form. We can now start to analys #TODO
+
+
+
+
+
+
+
+
