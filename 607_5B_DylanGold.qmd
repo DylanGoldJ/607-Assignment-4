@@ -15,3 +15,80 @@ I will use the implementation of the elo system shown in the video given in the 
 The formula for the expected score is 1/(1 + 10^((Rb - Ra)/400)). This formula is based off the fact that you would expect someone 400 rating higher to be 10 times more likely to win. It does not look like we need the rating change but the formula for that would be new_rating = rating + 32(score - expected_score). I will probably just get the expected score and compare to their actual score.
 
 ## Codebase
+First I have to get the data in a format I can work with. I modified my Project 1 File to create a new csv for this. \
+This new file has the opponents in a single column separated with -
+```{r, message=FALSE, warning=FALSE}
+url <- "https://raw.githubusercontent.com/DylanGoldJ/607-Project-1/refs/heads/main/player_data.csv"
+
+df <- read_csv(
+  file = url,
+  col_names = TRUE # We have column names
+)
+
+head(df, 10)
+```
+
+We can practice tidying our data to make the gather of expected score easier. \
+I will make longer to create more rows for each opponent faced.\
+```{r}
+# I tried with pivot longer but because the values are all in the row already we can use separate_rows()
+player_data <- separate_rows(
+  df, opponents, sep = " "
+  ) # Create new rows with - as the delimiter
+
+head(player_data, 12)
+```
+
+Now we need to separate the state of the match and the opponent. We can do this with mutate
+```{r}
+
+player_data <- player_data %>%
+  mutate(
+    match_result = substring(opponents, 1,1), #Get the first character, this is always the match_result
+    opponent = abs(parse_number(opponents)) # Because theres a dash it interprets it as negative, abs to fix
+  )
+
+player_data
+```
+
+
+We now have a tidy version of our data. \
+I will also select the necessary rows for this task.
+
+```{r}
+player_matches <- player_data %>% 
+  select(c("number", "name", "actual_score" = "points", "rating", "opponent", "match_status"))
+
+head(player_matches, 12)
+```
+
+Lets create a function that will calculate the expected score for a match. \
+It will take the data frame, players number and the opponent number and output our expected score
+
+```{r}
+
+#TODO Uncompleted
+# Uses the player_matches dataframe assumes
+get_expected_score <- function(df, player_num, opponent_num){
+  player_rating <- df %>% 
+    filter(opponent = opponent_num & number = player_num) %>%
+    select(rating) %>%
+    pull()
+    
+  print(player_rating)
+  
+  opponent_rating <- df %>%
+    filter(opponent = player_num & number = player_num) %>%
+    select(rating) %>%
+    pull()
+  
+  
+} 
+
+```
+
+
+
+
+
+
