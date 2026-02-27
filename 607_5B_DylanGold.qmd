@@ -15,6 +15,11 @@ I will use the implementation of the elo system shown in the video given in the 
 The formula for the expected score is 1/(1 + 10^((Rb - Ra)/400)). This formula is based off the fact that you would expect someone 400 rating higher to be 10 times more likely to win. It does not look like we need the rating change but the formula for that would be new_rating = rating + 32(score - expected_score). I will probably just get the expected score and compare to their actual score.
 
 ## Codebase
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(dplyr)
+```
+
 First I have to get the data in a format I can work with. I modified my Project 1 File to create a new csv for this. \
 This new file has the opponents in a single column separated with -
 ```{r, message=FALSE, warning=FALSE}
@@ -30,7 +35,7 @@ head(df, 10)
 
 We can practice tidying our data to make the gather of expected score easier. \
 I will make longer to create more rows for each opponent faced.\
-```{r}
+```{r,  warning=FALSE}
 # I tried with pivot longer but because the values are all in the row already we can use separate_rows()
 player_data <- separate_rows(
   df, opponents, sep = " "
@@ -40,7 +45,7 @@ head(player_data, 12)
 ```
 
 Now we need to separate the state of the match and the opponent. We can do this with mutate
-```{r}
+```{r,  warning=FALSE}
 
 player_data <- player_data %>%
   mutate(
@@ -50,45 +55,112 @@ player_data <- player_data %>%
 
 player_data
 ```
-
+We also need to drop rows where the opponent is na. \
+We only have NA values when there is no opponent because they did not face one. We can ignore these non existent matches.
+```{r}
+player_data <- player_data %>%
+  drop_na()
+```
 
 We now have a tidy version of our data. \
 I will also select the necessary rows for this task.
 
 ```{r}
 player_matches <- player_data %>% 
-  select(c("number", "name", "actual_score" = "points", "rating", "opponent", "match_status"))
+  select(c("number", "name", "actual_score" = "points", "rating", "opponent"))
 
 head(player_matches, 12)
 ```
 
 Lets create a function that will calculate the expected score for a match. \
-It will take the data frame, players number and the opponent number and output our expected score
+It will take the data frame, players number and the opponent number and output our expected score \
+We can manually calculate the expected score of player 1 vs player 39 and compare to test. I expect a score of .887
 
 ```{r}
+# Uses the player_matches, input player and opponent numbers
+get_expected_score <- function(player_num, opponent_num){
+  #Get player rating
+  player_rating <- player_matches %>% 
+    filter(opponent == opponent_num & number == player_num) %>%
+      select(rating) %>%
+        pull()
 
-#TODO Uncompleted
-# Uses the player_matches dataframe assumes
-get_expected_score <- function(df, player_num, opponent_num){
-  player_rating <- df %>% 
-    filter(opponent = opponent_num & number = player_num) %>%
-    select(rating) %>%
-    pull()
-    
-  print(player_rating)
+  #Get opponent rating
+  opponent_rating <- player_matches %>%
+    filter(opponent == player_num & number == opponent_num) %>%
+      select(rating) %>%
+        pull()
   
-  opponent_rating <- df %>%
-    filter(opponent = player_num & number = player_num) %>%
-    select(rating) %>%
-    pull()
+  #Calculate the expected score
+  expected_score <- 1/(1 + 10^((opponent_rating - player_rating)/400))
+  #print(paste(player_num, "-" , opponent_num, "-" , expected_score, "    " ))
   
+  return(expected_score)
   
 } 
 
+get_expected_score( 1, 39)
+```
+We now have a function for the expected score. We can use this to create a column of each matches expected score, group by player, then compare to their actual score.
+
+```{r, warning=FALSE}
+#Get the expected scores
+player_scores <- player_matches %>%
+  rowwise() %>%
+    mutate(
+      expected_score = get_expected_score(number,opponent)) %>%  
+        group_by(name) %>%
+          summarise(
+            expected_total_score = sum(expected_score),
+            actual_total_score = mean(actual_score),
+            total_score_diff = actual_score - expected_total_score
+          )
+player_scores
+```
+We can get the expected score for each match
+```{r}
+#Get the expected scores
+player_scores <- player_matches %>%
+  rowwise() %>%
+    mutate(
+      expected_score = get_expected_score(number,opponent))
+player_scores
 ```
 
+Group by the shared columns, while getting the sum of the expected_score.
+```{r, message=FALSE, warning=FALSE}
+player_scores_grp <- player_scores %>%
+  group_by(number, name, actual_score) %>%
+    summarise(
+      expected_score = sum(expected_score),
+      )
+head(player_scores_grp, 12)
+```
+Get the difference
+
+```{r}
+player_scores_grp <- player_scores_grp %>%
+  mutate(score_diff = actual_score - expected_score)
+
+head(player_scores_grp, 12)
+```
+
+We can see the values, they make sense, if gary scored 6 points but was predicted to get around 5.16 points he did .83 points better than predicted. \
+Now we can show the greatest values and worse values to see who performed the best.
+
+```{r}
+best_performances <- arrange(player_scores_grp, desc(score_diff))
+head(best_performances,10)
+```
+We can see that our top 5 performers are Aditya Bajaj, Zachary James Houghton, Anvit Rao, Jacob Alexander Lavalley and Amiyatosh Pwnanandam
+
+```{r}
+worse_performances <- arrange(player_scores_grp, score_diff)
+head(worse_performances,10)
+```
+
+We can see our bottom 5 performers are Loren Schwiebert, George Avery Jones, Jared Ge, Rishi Shetty and Joshua David Lee
 
 
-
-
-
+## Conclusion
+In this assignment we were able to futher build off of our project 1 and apply the concepts of tidying data to a data set. Because of the way I was able to export my data in Project 1 I ended up using separate_rows() to make my dataframe longer. In scenarios where we have more columns rather than a list of values in a column we could use pivot_longer to reach similar results. After the data was lengthened I could see how it would be very useful due to having access to groupby and other such features. Some ways I could further build on this project would be to look at the rating changes. We were given the rating changes already but calculating it ourselves or perhaps adjusting the rating change could be interesting. 
