@@ -1,9 +1,17 @@
 ---
-title: "607 Assignment 4B Dylan Gold"
+title: "607 Assignment 5B Dylan Gold"
 format: html
 editor: visual
 ---
 
-# 607 Assignment 4B Dylan Gold
+# 607 Assignment 5B Dylan Gold
 
 ## Approach
+In this assignment we need to evaluate elo scores from last week's project of formatting a data frame from a chess tournament txt. \
+Primarily, we must find the expected score of each player, then the actual score of each player. With these show the top 5 performers, and the bottom 5 performers based on this difference. 
+
+I will first get a csv from project 1 with the data needed for this. I will probably modify the project to give me a csv with the data needed for this assignment. \
+I will use the implementation of the elo system shown in the video given in the assignment. It seems appropriate because it is also chess related elo system. 
+The formula for the expected score is 1/(1 + 10^((Rb - Ra)/400)). This formula is based off the fact that you would expect someone 400 rating higher to be 10 times more likely to win. It does not look like we need the rating change but the formula for that would be new_rating = rating + 32(score - expected_score). I will probably just get the expected score and compare to their actual score.
+
+## Codebase
