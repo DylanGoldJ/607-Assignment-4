@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -69,14 +104,254 @@ ul.task-list li input[type="checkbox"] {
 <section id="approach" class="level2">
 <h2 class="anchored" data-anchor-id="approach">Approach</h2>
 <p>In this assignment we need to recreate a table given to us from an image, then tidy that data set.<br>
-When tidying a data set there are several things we have to do. Specifically we need to recreate the data in a way such that each column is a variable, row is a observation and each cell is a value. &nbsp; Then we need to count data and some sort of analysis with this, compare percentages and other things shown in the rubric.</p>
+When tidying a data set there are several things we have to do. Specifically we need to recreate the data in a way such that each column is a variable, row is a observation and each cell is a value. Then we need to count data and some sort of analysis with this, compare percentages and other things shown in the rubric.</p>
 <p>My plan is to recreate the data in csv format. I will just do it by hand because it is only 20 cell values and afew row and column names.<br>
-I will add an extra row name, which is implyed in the data but it would be easier to work with if it already had the row value.<br>
+I will add an extra row name, which is implied in the data but it would be easier to work with if it already had the row value.<br>
 Bring it into R and use tidyr and dplyr with to make it molten/long and go from there to perform the analysis. Functions like pivot_longer and pivot_wider will help.</p>
 </section>
+<section id="codebase" class="level2">
+<h2 class="anchored" data-anchor-id="codebase">Codebase</h2>
+<p>Setup libraries</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>First I manually make a csv from the image, then I import it in after pushing it to github.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/DylanGoldJ/607-Assignment-4/refs/heads/main/5A_Data.csv"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> url,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">col_names =</span> <span class="cn">TRUE</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 7
+  ...1   ...2    `Los Angeles` Phoenix `San Diego` `San Francisco` Seattle
+  &lt;chr&gt;  &lt;chr&gt;           &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt;   &lt;dbl&gt;
+1 ALASKA on time           497     221         212             503    1841
+2 &lt;NA&gt;   delayed            62      12          20             102     305
+3 &lt;NA&gt;   &lt;NA&gt;               NA      NA          NA              NA      NA
+4 AMWEST on time           694    4840         383             320     201
+5 &lt;NA&gt;   delayed           117     415          65             129      61
+6 &lt;NA&gt;   &lt;NA&gt;               NA      NA          NA              NA      NA</code></pre>
+</div>
+</div>
+<section id="tidying" class="level3">
+<h3 class="anchored" data-anchor-id="tidying">Tidying</h3>
+<p>We can start to make it tidy. We can start by fixing the first two column names. These were empty in the csv.<br>
+We can then create the ALASKA and AMWEST value for the 2nd and 4th column.<br>
+Then drop_na to get rid of the empty rows.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>airport_arrivals <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="fu">c</span>(<span class="at">airline =</span> <span class="st">"...1"</span>, <span class="at">arrival_status =</span> <span class="st">"...2"</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>airport_arrivals[<span class="dv">2</span>,<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"ALASKA"</span> <span class="co">#Place alaska value in 2nd row first column</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>airport_arrivals[<span class="dv">5</span>,<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"AMWEST"</span> <span class="co">#Place amwest value </span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>airport_arrivals <span class="ot">&lt;-</span> airport_arrivals <span class="sc">%&gt;%</span> <span class="fu">drop_na</span>()</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>airport_arrivals</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 7
+  airline arrival_status `Los Angeles` Phoenix `San Diego` `San Francisco`
+  &lt;chr&gt;   &lt;chr&gt;                  &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt;
+1 ALASKA  on time                  497     221         212             503
+2 ALASKA  delayed                   62      12          20             102
+3 AMWEST  on time                  694    4840         383             320
+4 AMWEST  delayed                  117     415          65             129
+# ℹ 1 more variable: Seattle &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>Now we can make it tidy by combining all the columns into row values. We need to have a row specifying the destination, as well as a column containing the frequency displayed in the cells in the data frame above.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>airport_arrivals <span class="ot">&lt;-</span> airport_arrivals <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="sc">!</span><span class="fu">c</span>(airline<span class="sc">:</span>arrival_status),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"destination"</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"frequency"</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(airport_arrivals, <span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8 × 4
+  airline arrival_status destination   frequency
+  &lt;chr&gt;   &lt;chr&gt;          &lt;chr&gt;             &lt;dbl&gt;
+1 ALASKA  on time        Los Angeles         497
+2 ALASKA  on time        Phoenix             221
+3 ALASKA  on time        San Diego           212
+4 ALASKA  on time        San Francisco       503
+5 ALASKA  on time        Seattle            1841
+6 ALASKA  delayed        Los Angeles          62
+7 ALASKA  delayed        Phoenix              12
+8 ALASKA  delayed        San Diego            20</code></pre>
+</div>
+</div>
 </section>
-<section id="codebase" class="level1">
-<h1>Codebase</h1>
+<section id="analysis" class="level3">
+<h3 class="anchored" data-anchor-id="analysis">Analysis</h3>
+<p>The data is now in tidy form. We can now do some analysis based on the count/frequency. We can start by getting the total arrivals.<br>
+We can mutate a new row after group_by the airline and destinations.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>airport_arrivals<span class="ot">&lt;-</span> airport_arrivals <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(airline, destination) <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">city_total =</span> <span class="fu">sum</span>(frequency))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(airport_arrivals, <span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8 × 5
+# Groups:   airline, destination [5]
+  airline arrival_status destination   frequency city_total
+  &lt;chr&gt;   &lt;chr&gt;          &lt;chr&gt;             &lt;dbl&gt;      &lt;dbl&gt;
+1 ALASKA  on time        Los Angeles         497        559
+2 ALASKA  on time        Phoenix             221        233
+3 ALASKA  on time        San Diego           212        232
+4 ALASKA  on time        San Francisco       503        605
+5 ALASKA  on time        Seattle            1841       2146
+6 ALASKA  delayed        Los Angeles          62        559
+7 ALASKA  delayed        Phoenix              12        233
+8 ALASKA  delayed        San Diego            20        232</code></pre>
+</div>
+</div>
+<p>We can also get the total across all 5 cities as a column.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>airport_arrivals<span class="ot">&lt;-</span> airport_arrivals <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(airline) <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>( <span class="at">airline_total =</span> <span class="fu">sum</span>(frequency))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(airport_arrivals, <span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8 × 6
+# Groups:   airline [1]
+  airline arrival_status destination   frequency city_total airline_total
+  &lt;chr&gt;   &lt;chr&gt;          &lt;chr&gt;             &lt;dbl&gt;      &lt;dbl&gt;         &lt;dbl&gt;
+1 ALASKA  on time        Los Angeles         497        559          3775
+2 ALASKA  on time        Phoenix             221        233          3775
+3 ALASKA  on time        San Diego           212        232          3775
+4 ALASKA  on time        San Francisco       503        605          3775
+5 ALASKA  on time        Seattle            1841       2146          3775
+6 ALASKA  delayed        Los Angeles          62        559          3775
+7 ALASKA  delayed        Phoenix              12        233          3775
+8 ALASKA  delayed        San Diego            20        232          3775</code></pre>
+</div>
+</div>
+<p>Lets look at the total on-time and total delayed for each airline</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>airport_total_arrival <span class="ot">&lt;-</span> airport_arrivals <span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(airline, arrival_status) <span class="sc">%&gt;%</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">sum</span>(frequency), <span class="at">.groups =</span> <span class="st">"keep"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>airport_total_arrival</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+# Groups:   airline, arrival_status [4]
+  airline arrival_status     n
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+1 ALASKA  delayed          501
+2 ALASKA  on time         3274
+3 AMWEST  delayed          787
+4 AMWEST  on time         6438</code></pre>
+</div>
+</div>
+<p>We can see that Alaska has less overall arrivals, AMWEST has greater total delayed and on time arrivals.<br>
+<br>
+Looking at the percentages would be more useful.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>airport_arrivals_percentages <span class="ot">&lt;-</span> airport_arrivals <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">city_percentage =</span> frequency<span class="sc">/</span>city_total,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">airline_percentage =</span> frequency<span class="sc">/</span>airline_total</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(airport_arrivals_percentages, <span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8 × 8
+# Groups:   airline [1]
+  airline arrival_status destination   frequency city_total airline_total
+  &lt;chr&gt;   &lt;chr&gt;          &lt;chr&gt;             &lt;dbl&gt;      &lt;dbl&gt;         &lt;dbl&gt;
+1 ALASKA  on time        Los Angeles         497        559          3775
+2 ALASKA  on time        Phoenix             221        233          3775
+3 ALASKA  on time        San Diego           212        232          3775
+4 ALASKA  on time        San Francisco       503        605          3775
+5 ALASKA  on time        Seattle            1841       2146          3775
+6 ALASKA  delayed        Los Angeles          62        559          3775
+7 ALASKA  delayed        Phoenix              12        233          3775
+8 ALASKA  delayed        San Diego            20        232          3775
+# ℹ 2 more variables: city_percentage &lt;dbl&gt;, airline_percentage &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>We can create graphics for these values. First lets do for the airline.&nbsp; Delayed and on time are complementary, we can just look at the delays</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>airline_delay_percentages <span class="ot">&lt;-</span> airport_arrivals_percentages <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(arrival_status <span class="sc">==</span> <span class="st">"delayed"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="fu">c</span>(airline, airline_percentage)) <span class="sc">%&gt;%</span> <span class="co">#Get the columns we need</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">group_by</span>(airline) <span class="sc">%&gt;%</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">summarise</span>(<span class="at">delay_percentage =</span> <span class="fu">sum</span>(airline_percentage))</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>airline_delay_percentages</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  airline delay_percentage
+  &lt;chr&gt;              &lt;dbl&gt;
+1 ALASKA             0.133
+2 AMWEST             0.109</code></pre>
+</div>
+</div>
+<p>From the table we can see that ALASKA airline has a greater percentage of delayed arrivals by approximately 3%</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(airline_delay_percentages, <span class="fu">aes</span>(<span class="at">x =</span> airline, <span class="at">y =</span> delay_percentage)) <span class="sc">+</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat=</span><span class="st">"identity"</span>, <span class="at">fill=</span><span class="st">"steelblue"</span>) <span class="sc">+</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label=</span>delay_percentage), <span class="at">vjust=</span><span class="fl">1.6</span>, <span class="at">color=</span><span class="st">"white"</span>, <span class="at">size=</span><span class="fl">3.5</span>) <span class="sc">+</span> </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># I got this formating from https://www.sthda.com/english/wiki/ggplot2-barplots-quick-start-guide-r-software-and-data-visualization</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"ALASKA vs AMWEST Delay Percentages"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="607_5A_DylanGold_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now lets do it across the cities.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>city_delay_percentages <span class="ot">&lt;-</span> airport_arrivals_percentages <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(arrival_status <span class="sc">==</span> <span class="st">"delayed"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(airline, destination, <span class="at">delay_percentage =</span> city_percentage)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(city_delay_percentages, <span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8 × 3
+# Groups:   airline [2]
+  airline destination   delay_percentage
+  &lt;chr&gt;   &lt;chr&gt;                    &lt;dbl&gt;
+1 ALASKA  Los Angeles             0.111 
+2 ALASKA  Phoenix                 0.0515
+3 ALASKA  San Diego               0.0862
+4 ALASKA  San Francisco           0.169 
+5 ALASKA  Seattle                 0.142 
+6 AMWEST  Los Angeles             0.144 
+7 AMWEST  Phoenix                 0.0790
+8 AMWEST  San Diego               0.145 </code></pre>
+</div>
+</div>
+<p>Create a plot. &nbsp; We can see that AMWEST has a higher delay rate when comparing each of the cities indivudually.<br>
+This is a discrepancy when compared to what we saw in the total airline percentage of delays.<br>
+This is an example of Simpsons Paradox. While individually AMWEST has a higher delay in each city, due to the counts of the arrivals in each city.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(city_delay_percentages, <span class="fu">aes</span>(<span class="at">fill =</span> airline, <span class="at">x =</span> destination, <span class="at">y =</span> delay_percentage)) <span class="sc">+</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position=</span><span class="st">"dodge"</span>, <span class="at">stat=</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label=</span> <span class="fu">round</span>(delay_percentage, <span class="dv">4</span>)), <span class="at">vjust=</span><span class="fl">1.5</span>, <span class="at">color=</span><span class="st">"black"</span>, <span class="at">size=</span><span class="fl">3.5</span>) <span class="sc">+</span> </span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co"># I got this formating from https://www.sthda.com/english/wiki/ggplot2-barplots-quick-start-guide-r-software-and-data-visualization</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"ALASKA vs AMWEST Delay Percentages"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="607_5A_DylanGold_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>In this assignment we were given an image to recreate a csv. We then tidied the csv by fixing null values, as well as dropping fully empty columns. We made the csv longer by using pivot longer to convert the column data into more rows. After the data was tidy we looked at the total count of each of the necessary grouped rows, like across cities and the total. We then looked at the percentages across cities and across airlines to compare each of the airlines. We saw an example of simpsons paradox where when looking at each city’s percentage comparison we saw AMWEST have more delays. When looking at the total we say ALASKA have more delays as a percentage. This was due to how each of the cities had different total arrivals.<br>
+One way we could further improve this assignment could be to figure out how significant the difference in percentages are, or compare more airlines other than Alaska and Amwest</p>
+</section>
 </section>
 
 </main>

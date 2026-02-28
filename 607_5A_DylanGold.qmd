@@ -15,17 +15,17 @@ My plan is to recreate the data in csv format. I will just do it by hand because
 I will add an extra row name, which is implied in the data but it would be easier to work with if it already had the row value.\
 Bring it into R and use tidyr and dplyr with to make it molten/long and go from there to perform the analysis. Functions like pivot_longer and pivot_wider will help.
 
-# Codebase
+## Codebase
+
 Setup libraries
+
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(dplyr)
+library(ggplot2)
 ```
 
-
 First I manually make a csv from the image, then I import it in after pushing it to github.
-
-
 
 ```{r,message=FALSE, warning=FALSE}
 url <- "https://raw.githubusercontent.com/DylanGoldJ/607-Assignment-4/refs/heads/main/5A_Data.csv"
@@ -38,12 +38,22 @@ df <- read_csv(
 df
 ```
 
-We can start to make it tidy. We can start by fixing the first two column names
+### Tidying
+
+We can start to make it tidy. We can start by fixing the first two column names. These were empty in the csv.\
+We can then create the ALASKA and AMWEST value for the 2nd and 4th column.\
+Then drop_na to get rid of the empty rows.
+
 ```{r}
 airport_arrivals <- df %>% rename(c(airline = "...1", arrival_status = "...2"))
+airport_arrivals[2,1] <- "ALASKA" #Place alaska value in 2nd row first column
+airport_arrivals[5,1] <- "AMWEST" #Place amwest value 
+airport_arrivals <- airport_arrivals %>% drop_na()
 airport_arrivals
 ```
+
 Now we can make it tidy by combining all the columns into row values. We need to have a row specifying the destination, as well as a column containing the frequency displayed in the cells in the data frame above.
+
 ```{r}
 airport_arrivals <- airport_arrivals %>%
   pivot_longer(
@@ -56,10 +66,88 @@ head(airport_arrivals, 8)
 
 ```
 
-The data is now in tidy form. We can now start to analys #TODO
+### Analysis
+
+The data is now in tidy form. We can now do some analysis based on the count/frequency. We can start by getting the total arrivals. \
+We can mutate a new row after group_by the airline and destinations.
+```{r}
+airport_arrivals<- airport_arrivals %>%
+  group_by(airline, destination) %>%
+    mutate(city_total = sum(frequency))
+head(airport_arrivals, 8)
+```
+We can also get the total across all 5 cities as a column.
+```{r}
+airport_arrivals<- airport_arrivals %>%
+  group_by(airline) %>%
+    mutate( airline_total = sum(frequency))
+head(airport_arrivals, 8)
+```
+
+Lets look at the total on-time and total delayed for each airline
+
+```{r}
+airport_total_arrival <- airport_arrivals %>%
+  group_by(airline, arrival_status) %>%
+    summarise(n = sum(frequency), .groups = "keep")
+airport_total_arrival
+```
+We can see that Alaska has less overall arrivals, AMWEST has greater total delayed and on time arrivals. \
+\
+Looking at the percentages would be more useful.
+```{r}
+airport_arrivals_percentages <- airport_arrivals %>%
+  mutate(
+    city_percentage = frequency/city_total,
+    airline_percentage = frequency/airline_total
+  )
+head(airport_arrivals_percentages, 8)
+```
+We can create graphics for these values. First lets do for the airline.\ 
+Delayed and on time are complementary, we can just look at the delays
+```{r}
+airline_delay_percentages <- airport_arrivals_percentages %>%
+  filter(arrival_status == "delayed") %>%
+    select(c(airline, airline_percentage)) %>% #Get the columns we need
+      group_by(airline) %>%
+        summarise(delay_percentage = sum(airline_percentage))
+
+airline_delay_percentages
+```
+From the table we can see that ALASKA airline has a greater percentage of delayed arrivals by approximately 3%
+```{r}
+ggplot(airline_delay_percentages, aes(x = airline, y = delay_percentage)) +
+  geom_bar(stat="identity", fill="steelblue") +
+  geom_text(aes(label=delay_percentage), vjust=1.6, color="white", size=3.5) + 
+# I got this formating from https://www.sthda.com/english/wiki/ggplot2-barplots-quick-start-guide-r-software-and-data-visualization
+  labs(title="ALASKA vs AMWEST Delay Percentages")
+```
+
+Now lets do it across the cities.
+```{r}
+city_delay_percentages <- airport_arrivals_percentages %>%
+  filter(arrival_status == "delayed") %>%
+    select(airline, destination, delay_percentage = city_percentage)
+
+head(city_delay_percentages, 8)
+
+```
+Create a plot. \ 
+We can see that AMWEST has a higher delay rate when comparing each of the cities indivudually. \
+This is a discrepancy when compared to what we saw in the total airline percentage of delays. \
+This is an example of Simpsons Paradox. While individually AMWEST has a higher delay in each city, due to the counts of the arrivals in each city.
+```{r}
+ggplot(city_delay_percentages, aes(fill = airline, x = destination, y = delay_percentage)) +
+  geom_bar(position="dodge", stat="identity") +
+  geom_text(aes(label= round(delay_percentage, 4)), vjust=1.5, color="black", size=3.5) + 
+# I got this formating from https://www.sthda.com/english/wiki/ggplot2-barplots-quick-start-guide-r-software-and-data-visualization
+  labs(title="ALASKA vs AMWEST Delay Percentages")
+```
 
 
-
+## Conclusion
+In this assignment we were given an image to recreate a csv. We then tidied the csv by fixing null values, as well as dropping fully empty columns. We made the csv longer by using pivot longer to convert the column data into more rows. After the data was tidy we looked at the total count of each of the necessary grouped rows, like across cities and the total. We then looked at the percentages across cities and across airlines to compare each of the airlines. We saw an example of simpsons paradox where when looking at each city's percentage comparison we saw AMWEST have more delays. When looking at the total we say ALASKA have more delays as a percentage. This was due to how each of the cities had different total arrivals. \
+One way we could further improve this assignment could be to figure out how significant the difference in percentages are, or compare more airlines other than Alaska and Amwest
 
 
 
