@@ -145,7 +145,7 @@ This new file has the opponents in a single column separated with -</p>
 I will make longer to create more rows for each opponent faced.<br>
 </p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># I tried with pivot longer but because the values are all in the row already we can use separate_rows()</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot longer is not needed here because the values are all in the row already. We can use separate_rows()</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>player_data <span class="ot">&lt;-</span> <span class="fu">separate_rows</span>(</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  df, opponents, <span class="at">sep =</span> <span class="st">" "</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="co"># Create new rows with - as the delimiter</span></span>
@@ -176,24 +176,20 @@ I will make longer to create more rows for each opponent faced.<br>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">match_result =</span> <span class="fu">substring</span>(opponents, <span class="dv">1</span>,<span class="dv">1</span>), <span class="co">#Get the first character, this is always the match_result</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">opponent =</span> <span class="fu">abs</span>(<span class="fu">parse_number</span>(opponents)) <span class="co"># Because theres a dash it interprets it as negative, abs to fix</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>player_data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#Show the new columns</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(player_data <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">c</span>(number, name, opponents, match_result, opponent )), <span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 448 × 9
-   number name    state points rating opponents avg_opponent_rating match_result
-    &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;                   &lt;dbl&gt; &lt;chr&gt;       
- 1      1 Gary H… ON         6   1794 W-39                    1605. W           
- 2      1 Gary H… ON         6   1794 W-21                    1605. W           
- 3      1 Gary H… ON         6   1794 W-18                    1605. W           
- 4      1 Gary H… ON         6   1794 W-14                    1605. W           
- 5      1 Gary H… ON         6   1794 W-7                     1605. W           
- 6      1 Gary H… ON         6   1794 D-12                    1605. D           
- 7      1 Gary H… ON         6   1794 D-4                     1605. D           
- 8      2 Dakshe… MI         6   1553 W-63                    1469. W           
- 9      2 Dakshe… MI         6   1553 W-58                    1469. W           
-10      2 Dakshe… MI         6   1553 L-4                     1469. L           
-# ℹ 438 more rows
-# ℹ 1 more variable: opponent &lt;dbl&gt;</code></pre>
+<pre><code># A tibble: 8 × 5
+  number name            opponents match_result opponent
+   &lt;dbl&gt; &lt;chr&gt;           &lt;chr&gt;     &lt;chr&gt;           &lt;dbl&gt;
+1      1 Gary Hua        W-39      W                  39
+2      1 Gary Hua        W-21      W                  21
+3      1 Gary Hua        W-18      W                  18
+4      1 Gary Hua        W-14      W                  14
+5      1 Gary Hua        W-7       W                   7
+6      1 Gary Hua        D-12      D                  12
+7      1 Gary Hua        D-4       D                   4
+8      2 Dakshesh Daruri W-63      W                  63</code></pre>
 </div>
 </div>
 <p>We also need to drop rows where the opponent is na.<br>
@@ -253,55 +249,20 @@ We can manually calculate the expected score of player 1 vs player 39 and compar
 <span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>} </span>
 <span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="fu">get_expected_score</span>( <span class="dv">1</span>, <span class="dv">39</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="fu">get_expected_score</span>(<span class="dv">1</span>, <span class="dv">39</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.8870357</code></pre>
 </div>
 </div>
-<p>We now have a function for the expected score. We can use this to create a column of each matches expected score, group by player, then compare to their actual score.</p>
+<p>We now have a function for the expected score. We can use this to create a column of each matches expected score, group by player, then compare to their actual score. First get the expected score for each match</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the expected scores</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>player_scores <span class="ot">&lt;-</span> player_matches <span class="sc">%&gt;%</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">expected_score =</span> <span class="fu">get_expected_score</span>(number,opponent)) <span class="sc">%&gt;%</span>  </span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">group_by</span>(name) <span class="sc">%&gt;%</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>          <span class="fu">summarise</span>(</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">expected_total_score =</span> <span class="fu">sum</span>(expected_score),</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">actual_total_score =</span> <span class="fu">mean</span>(actual_score),</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">total_score_diff =</span> actual_score <span class="sc">-</span> expected_total_score</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>          )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'name'. You can override using the
-`.groups` argument.</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>player_scores</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 408 × 4
-# Groups:   name [64]
-   name         expected_total_score actual_total_score total_score_diff
-   &lt;chr&gt;                       &lt;dbl&gt;              &lt;dbl&gt;            &lt;dbl&gt;
- 1 Aditya Bajaj                 1.95                  6           4.05  
- 2 Aditya Bajaj                 1.95                  6           4.05  
- 3 Aditya Bajaj                 1.95                  6           4.05  
- 4 Aditya Bajaj                 1.95                  6           4.05  
- 5 Aditya Bajaj                 1.95                  6           4.05  
- 6 Aditya Bajaj                 1.95                  6           4.05  
- 7 Aditya Bajaj                 1.95                  6           4.05  
- 8 Alan Bui                     3.94                  4           0.0589
- 9 Alan Bui                     3.94                  4           0.0589
-10 Alan Bui                     3.94                  4           0.0589
-# ℹ 398 more rows</code></pre>
-</div>
-</div>
-<p>We can get the expected score for each match</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the expected scores</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>player_scores <span class="ot">&lt;-</span> player_matches <span class="sc">%&gt;%</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">expected_score =</span> <span class="fu">get_expected_score</span>(number,opponent))</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>player_scores</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">expected_score =</span> <span class="fu">get_expected_score</span>(number,opponent)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>player_scores</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 408 × 6
 # Rowwise: 
@@ -322,12 +283,12 @@ We can manually calculate the expected score of player 1 vs player 39 and compar
 </div>
 <p>Group by the shared columns, while getting the sum of the expected_score.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>player_scores_grp <span class="ot">&lt;-</span> player_scores <span class="sc">%&gt;%</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(number, name, actual_score) <span class="sc">%&gt;%</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">expected_score =</span> <span class="fu">sum</span>(expected_score),</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(player_scores_grp, <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>player_scores_grp <span class="ot">&lt;-</span> player_scores <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(number, name, actual_score) <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">expected_score =</span> <span class="fu">sum</span>(expected_score),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(player_scores_grp, <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 12 × 4
 # Groups:   number, name [12]
@@ -349,10 +310,10 @@ We can manually calculate the expected score of player 1 vs player 39 and compar
 </div>
 <p>Get the difference</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>player_scores_grp <span class="ot">&lt;-</span> player_scores_grp <span class="sc">%&gt;%</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">score_diff =</span> actual_score <span class="sc">-</span> expected_score)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(player_scores_grp, <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>player_scores_grp <span class="ot">&lt;-</span> player_scores_grp <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">score_diff =</span> actual_score <span class="sc">-</span> expected_score)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(player_scores_grp, <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 12 × 5
 # Groups:   number, name [12]
@@ -375,8 +336,8 @@ We can manually calculate the expected score of player 1 vs player 39 and compar
 <p>We can see the values, they make sense, if gary scored 6 points but was predicted to get around 5.16 points he did .83 points better than predicted.<br>
 Now we can show the greatest values and worse values to see who performed the best.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>best_performances <span class="ot">&lt;-</span> <span class="fu">arrange</span>(player_scores_grp, <span class="fu">desc</span>(score_diff))</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(best_performances,<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>best_performances <span class="ot">&lt;-</span> <span class="fu">arrange</span>(player_scores_grp, <span class="fu">desc</span>(score_diff))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(best_performances,<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 5
 # Groups:   number, name [10]
@@ -396,8 +357,8 @@ Now we can show the greatest values and worse values to see who performed the be
 </div>
 <p>We can see that our top 5 performers are Aditya Bajaj, Zachary James Houghton, Anvit Rao, Jacob Alexander Lavalley and Amiyatosh Pwnanandam</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>worse_performances <span class="ot">&lt;-</span> <span class="fu">arrange</span>(player_scores_grp, score_diff)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(worse_performances,<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>worse_performances <span class="ot">&lt;-</span> <span class="fu">arrange</span>(player_scores_grp, score_diff)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(worse_performances,<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 5
 # Groups:   number, name [10]
